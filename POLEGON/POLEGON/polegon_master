@@ -72,21 +72,17 @@ def tip_ages_to_ordered(tip_ages_file, ts):
     def _label(meta):
         return meta.decode().strip() if isinstance(meta, (bytes, bytearray)) else str(meta).strip()
 
-    if len(name_to_age) == n:
-        level = "per-haplotype"
-        labels = [_label(ts.node(s).metadata) for s in samples]
-    elif n % 2 == 0 and len(name_to_age) == n_dip:
-        level = "per-diploid"
-        labels = [
-            _label(ts.individual(ts.node(s).individual).metadata)
-            if ts.node(s).individual != tskit.NULL else ""
-            for s in samples
-        ]
-    else:
+    if n % 2 != 0 or len(name_to_age) != n_dip:
         raise ValueError(
-            f"tip_ages (two-column) has {len(name_to_age)} rows; expected {n} "
-            f"(per-haplotype labels) or {n_dip} (per-diploid labels)."
+            f"tip_ages (two-column) has {len(name_to_age)} rows; expected {n_dip} "
+            f"(one per diploid sample)."
         )
+    level = "per-diploid"
+    labels = [
+        _label(ts.individual(ts.node(s).individual).metadata)
+        if ts.node(s).individual != tskit.NULL else ""
+        for s in samples
+    ]
 
     missing_label = next((s for s, lab in zip(samples, labels) if not lab), None)
     if missing_label is not None:
@@ -101,10 +97,6 @@ def tip_ages_to_ordered(tip_ages_file, ts):
         raise ValueError(
             f"tip_ages {level} labels do not match the tree sequence. Tree sequence labels with no row: "
             f"{no_row or 'none'}; rows matching no tip: {no_tip or 'none'}."
-        )
-    if level == "per-haplotype" and len(label_set) != n:
-        raise ValueError(
-            "tip_ages: Tree sequence has duplicate per-haplotype tip labels; cannot match uniquely."
         )
     return [name_to_age[lab] for lab in labels]
 
@@ -465,8 +457,8 @@ def main():
                         help='Prefix for the output .trees file.')
     parser.add_argument('-tip_ages', type=str, required=False, default=None,
                         help='Tip ages file (column count auto-detected): one column '
-                             '(calendar_age_BP per haplotype, in VCF sample order) or two columns '
-                             '(tip_label calendar_age_BP).')
+                             '(calendar_age_BP per diploid sample, in VCF sample order) or two columns '
+                             '(sample_name calendar_age_BP).')
     parser.add_argument('-g', type=float, required=False, default=None,
                         help='Generation time in years. Required when -tip_ages is provided.')
     parser.add_argument('-seed', type=int, required=False, default=42,

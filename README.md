@@ -31,7 +31,7 @@ The following details to these arguments can be displayed if you simply type `po
 |**-scaling_rep**|optional|the number of ARG rescaling steps after MCMC. Default: 5|
 |**-scaling_bin**|optional|the number of time bins used for ARG rescaling. Default: 100|
 |**-scaling_subsample**|optional|the number of posterior samples used to estimate the shared ARG rescaling grid and factors. Default: 10|
-|**-tip_ages**|conditionally required|file of sample ages, in either of two auto-detected formats: one column (one age per diploid sample or per haplotype, in VCF sample order) or two columns (`name  calendar_age_BP`, where `name` is a per-diploid sample name or a per-haplotype tip label). Required for heterochronous (ancient DNA) data. Tip ages supplied via this flag are prioritized, even when the input ARG already contains tip age information.|
+|**-tip_ages**|conditionally required|file of sample ages, in either of two auto-detected formats: one column (one age per diploid sample, in VCF sample order) or two columns (`name  calendar_age_BP`, where `name` is a diploid sample name). Required for heterochronous (ancient DNA) data. Tip ages supplied via this flag are prioritized, even when the input ARG already contains tip age information.|
 |**-seed**|optional|random seed for the MCMC. Default: 42|
 |**-cores**|optional|number of CPU cores for parallel chromatic Gibbs MCMC. Default: 1|
 |**-no_mean**|optional|skip computing the posterior mean node ages.|
@@ -54,9 +54,9 @@ For data sets containing samples from different time points (e.g., ancient DNA),
 polegon_master -m mutation_rate -input input.trees -output output_prefix -tip_ages ages.txt -g 29
 ```
 
-The tip ages file can be given in two formats, with the column count detected automatically. Ages are in calendar years before present. Either format may be specified per diploid sample (the age is applied to both of the sample's haplotypes) or per haplotype.
+The tip ages file can be given in two formats, with the column count detected automatically. Ages are in calendar years before present, one per diploid sample (the age is applied to both of the sample's haplotypes).
 
-With **two columns** (`name  calendar_age_BP`), each age is matched by `name` to a labeled tip. `name` is either a per-diploid sample name (e.g. `tsk_0`) or a per-haplotype tip label (e.g. `tsk_0_0`); this requires the tree sequence to carry tip labels. Example:
+With **two columns** (`name  calendar_age_BP`), each age is matched by `name` to a labeled diploid sample (e.g. `tsk_0`); this requires the tree sequence to carry sample labels. Example:
 
 ```
 tsk_0    0
@@ -64,7 +64,7 @@ tsk_1    3500
 tsk_2    8000
 ```
 
-With **one column**, give ages positionally in VCF sample order — one row per diploid sample, or one row per haplotype. Use this when the tree sequence has no tip labels, such as raw SINGER output where the haplotypes are enumerated `0…n-1`. The same three diploid samples:
+With **one column**, give ages positionally in VCF sample order, one row per diploid sample. Use this when the tree sequence has no sample labels, such as raw SINGER output where the haplotypes are enumerated `0…n-1`. The same three diploid samples:
 
 ```
 0
